@@ -33,7 +33,7 @@ function serve(req, res) {
     let data = fs.readFileSync('../bench-ssb-share/@6CAxOI3f+LUOVrbAl0IemqiS7ATpQvr9Mdw9LC4+Uv0=.ed25519/bench-' + num + '.json')
     let benchName = Object.keys(JSON.parse(data))[0]
 
-    selectOptions.push(h('option', { value: i - 1 }, benchName))
+    selectOptions.push(h('option', { value: i - 1 }, num + ' ' + benchName))
 
     dataScripts.push(h('script', 'bench[' + i + '] = ' + data))
   }
