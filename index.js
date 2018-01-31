@@ -21,24 +21,26 @@ function serve(req, res) {
   let chartScript = h('script')
   chartScript.innerHTML = fs.readFileSync('node_modules/chart.js/dist/Chart.js')
 
-  let colorScript =  h('script')
-  colorScript.innerHTML = "var colors = " + JSON.stringify(colors)
+  let colorScript =  h('script', "var colors = " + JSON.stringify(colors))
 
   let dataScripts = []
-  let dataScriptStart = h('script')
-  dataScriptStart.innerHTML = "var bench = {}"
-  dataScripts.push(dataScriptStart)
+  dataScripts.push(h('script', "var bench = {}"))
+
+  let selectOptions = []
 
   for (var i = 1; i <= 11; ++i) {
     let num = String(i).padStart(2, '0')
-    let dataScript = h('script')
-    dataScript.innerHTML = 'bench[' + i + '] = ' + fs.readFileSync('../bench-ssb-share/@6CAxOI3f+LUOVrbAl0IemqiS7ATpQvr9Mdw9LC4+Uv0=.ed25519/bench-' + num + '.json')
-    dataScripts.push(dataScript)
+    let data = fs.readFileSync('../bench-ssb-share/@6CAxOI3f+LUOVrbAl0IemqiS7ATpQvr9Mdw9LC4+Uv0=.ed25519/bench-' + num + '.json')
+    let benchName = Object.keys(JSON.parse(data))[0]
+
+    selectOptions.push(h('option', { value: i - 1 }, benchName))
+
+    dataScripts.push(h('script', 'bench[' + i + '] = ' + data))
   }
   
   let runScript = h('script')
   runScript.innerHTML = fs.readFileSync('visualize.js')
-  
+
   let html = '<!doctype html>' +
         h('html',
           [h('head',
@@ -46,6 +48,7 @@ function serve(req, res) {
               chartScript, colorScript, dataScripts]),
            h('body',
              [h('h1', "Bench ssb"),
+              h('select', { id: 'benchSelect', multiple: '' }, selectOptions),
               h('canvas', { id: "myChart", width: "400", height: "400" }),
               runScript]
             )]).outerHTML
