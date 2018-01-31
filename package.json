@@ -1,0 +1,23 @@
+{
+  "name": "benchmark-ci-visualizer",
+  "version": "0.0.1",
+  "description": "A server for vizualing data from scuttlebutt benchmarks",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssb://%ZjxP02wfmuYPQ5+ye+M3yoszJ14rJbZDwATdJ9vTWqk=.sha256"
+  },
+  "author": "Anders Rune Jensen <arj03@protonmail.ch>",
+  "license": "Beerware",
+  "dependencies": {
+    "chart.js": "^2.7.1",
+    "hyperscript": "2.0.2",
+    "nice-color-palettes": "^2.0.0"
+  }
+}
