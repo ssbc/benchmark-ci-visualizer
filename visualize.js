@@ -2,17 +2,17 @@
   var ctx = document.getElementById("myChart").getContext('2d');
 
   let datasets = []
-
-  for (var i = 1; i <= 11; ++i) {
-    let num = String(i).padStart(2, '0')
-    let name = Object.keys(bench[i])[0]
+  let i = 0
+  
+  for (var key in bench) {
     datasets.push({
-      label: num + ': ' + name,
-      data: bench[i][name].map((v) => { return { x: v[0], y: v[1] } }),
+      label: key,
+      data: bench[key].map((v) => { return { x: v[0], y: v[1] } }),
       fill: false,
       backgroundColor: colors[i][0],
       borderColor: colors[i][0]
     })
+    ++i
   }
 
   let chart = new Chart(ctx, {
@@ -24,11 +24,11 @@
 
   let select = document.getElementById("benchSelect")
   select.onchange = (ev) => {
-    let selectedIndexes = Array.from(select.selectedOptions).map(opt => parseInt(opt.value))
-    if (selectedIndexes.length == 0)
+    let selectedItems = Array.from(select.selectedOptions).map(opt => opt.value)
+    if (selectedItems.length == 0)
       chart.data.datasets = datasets
     else
-      chart.data.datasets = datasets.filter((el, i) => selectedIndexes.includes(i))
+      chart.data.datasets = datasets.filter((d) => selectedItems.includes(d.label))
 
     chart.update()
   }

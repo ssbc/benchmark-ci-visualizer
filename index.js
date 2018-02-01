@@ -1,5 +1,6 @@
 var http = require('http')
 var fs = require('fs');
+var path = require('path');
 var h = require('hyperscript');
 var colors = require('nice-color-palettes')
 
@@ -28,15 +29,32 @@ function serve(req, res) {
 
   let selectOptions = []
 
-  for (var i = 1; i <= 11; ++i) {
-    let num = String(i).padStart(2, '0')
-    let data = fs.readFileSync('../bench-ssb-share/@6CAxOI3f+LUOVrbAl0IemqiS7ATpQvr9Mdw9LC4+Uv0=.ed25519/2018-01-31_22:00:00/bench-' + num + '.json')
-    let benchName = Object.keys(JSON.parse(data))[0]
+  let parseAndAddFile = (filename) => {
+    if (filename.indexOf(".json") == -1) return
+    
+    let pathname = path.basename(filename)
+    let data = fs.readFileSync(filename)
+    let json = JSON.parse(data)
+    let benchName = Object.keys(json)[0] // we expect only 1 per file
 
-    selectOptions.push(h('option', { value: i - 1 }, num + ' ' + benchName))
-
-    dataScripts.push(h('script', 'bench[' + i + '] = ' + data))
+    selectOptions.push(h('option', { value: benchName }, pathname + ' ' + benchName))
+    dataScripts.push(h('script', 'bench["' + benchName + '"] = ' + JSON.stringify(json[benchName])))
   }
+
+  let parseDir = (path) => {
+    let contents = fs.readdirSync(path)
+    contents.forEach((content) => {
+      let stat = fs.statSync(path + content)
+      if (stat.isDirectory())
+        parseDir(path + content + "/")
+      else
+        parseAndAddFile(path + content)
+    })
+  }
+  
+  let sharedir = '../bench-ssb-share/'
+
+  parseDir(sharedir)
   
   let runScript = h('script')
   runScript.innerHTML = fs.readFileSync('visualize.js')
