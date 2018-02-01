@@ -1,19 +1,24 @@
 (function() {
   var ctx = document.getElementById("myChart").getContext('2d');
 
-  let datasets = []
-  let i = 0
-  
-  for (var key in bench) {
-    datasets.push({
-      label: key,
-      data: bench[key].map((v) => { return { x: v[0], y: v[1] } }),
-      fill: false,
-      backgroundColor: colors[i][0],
-      borderColor: colors[i][0]
-    })
-    ++i
+  let createDatasetFromBenchmarks = (benchmarks) => {
+    let ds = []
+
+    for (let i = 0; i < benchmarks.length; ++i) {
+      let b = benchmarks[i]
+      ds.push({
+        label: b.bench,
+        data: b.data.map((v) => { return { x: v[0], y: v[1] } }),
+        fill: false,
+        backgroundColor: colors[i][0],
+        borderColor: colors[i][0]
+      })
+    }
+
+    return ds
   }
+
+  let datasets = createDatasetFromBenchmarks(bench)
 
   let chart = new Chart(ctx, {
     type: 'scatter',
@@ -22,14 +27,32 @@
     }
   })
 
-  let select = document.getElementById("benchSelect")
-  select.onchange = (ev) => {
-    let selectedItems = Array.from(select.selectedOptions).map(opt => opt.value)
-    if (selectedItems.length == 0)
-      chart.data.datasets = datasets
-    else
-      chart.data.datasets = datasets.filter((d) => selectedItems.includes(d.label))
+  let benchSelect = document.getElementById("benchSelect")
+  let userSelect = document.getElementById("userSelect")
+  let folderSelect = document.getElementById("folderSelect")
+
+  let handleChange = (ev) => {
+    let filteredBench = bench
+
+    let selectedBenchItems = Array.from(benchSelect.selectedOptions).map(opt => opt.value)
+    if (selectedBenchItems.length > 0)
+      filteredBench = filteredBench.filter((b) => selectedBenchItems.includes(b.bench))
+
+    let selectedUserItems = Array.from(userSelect.selectedOptions).map(opt => opt.value)
+    if (selectedUserItems.length > 0)
+      filteredBench = filteredBench.filter((b) => selectedUserItems.includes(b.user))
+
+    let selectedFolderItems = Array.from(folderSelect.selectedOptions).map(opt => opt.value)
+    if (selectedFolderItems.length > 0)
+      filteredBench = filteredBench.filter((b) => selectedFolderItems.includes(b.folder))
+
+    chart.data.datasets = createDatasetFromBenchmarks(filteredBench)
 
     chart.update()
   }
+
+  benchSelect.onchange = handleChange
+  userSelect.onchange = handleChange
+  folderSelect.onchange = handleChange
+
 })();
