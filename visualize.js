@@ -30,6 +30,7 @@
   let benchSelect = document.getElementById("benchSelect")
   let userSelect = document.getElementById("userSelect")
   let folderSelect = document.getElementById("folderSelect")
+  let systemInfoDiv = document.getElementById("systemInfo")
 
   let handleChange = (ev) => {
     let filteredBench = bench
@@ -47,9 +48,18 @@
       filteredBench = filteredBench.filter((b) => selectedFolderItems.includes(b.folder))
 
     chart.data.datasets = createDatasetFromBenchmarks(filteredBench)
-
     chart.update()
+
+    updateSystemInfo(filteredBench)
   }
+
+  let updateSystemInfo = (benchmarks) => {
+    let systemInfos = [...new Set(benchmarks.map(b => JSON.stringify(b.systemInfo, null, 2)))]
+    if (systemInfos.length == 1)
+      systemInfoDiv.innerHTML = "System info:" + systemInfos[0]
+  }
+
+  updateSystemInfo(bench)
 
   benchSelect.onchange = handleChange
   userSelect.onchange = handleChange

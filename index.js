@@ -28,19 +28,28 @@ function serve(req, res) {
   let benchmarks = []
 
   let parseAndAddFile = (filename, userFolder, runFolder) => {
-    if (filename.indexOf(".json") == -1) return
-    
     let pathname = path.basename(filename)
+
+    if (!filename.endsWith(".json") || pathname == 'system-info.json') return
+
     let data = fs.readFileSync(filename)
     let json = JSON.parse(data)
     let benchName = Object.keys(json)[0] // we expect only 1 per file
+    let systemInfo = {}
+
+    try {
+      systemInfo = JSON.parse(fs.readFileSync(filename.replace(pathname, "system-info.json"), "utf8"))
+    } catch (ex) {
+      console.log("error reading system-info.json", ex)
+    }
 
     let benchData = {
       user: userFolder,
       folder: runFolder,
-      pathname: pathname,
+      pathname,
       bench: benchName,
-      data: json[benchName]
+      data: json[benchName],
+      systemInfo
     }
 
     benchmarks.push(benchData)
@@ -96,6 +105,7 @@ function serve(req, res) {
               h('select', { id: 'benchSelect', multiple: '' }, benchSelectOptions),
               h('select', { id: 'userSelect', multiple: '' }, userSelectOptions),
               h('select', { id: 'folderSelect', multiple: '' }, folderSelectOptions),
+              h('div', { id: 'systemInfo' }),
               h('canvas', { id: "myChart", width: "400", height: "400" }),
               runScript]
             )]).outerHTML
