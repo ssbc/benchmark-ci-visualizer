@@ -1,7 +1,7 @@
 var http = require('http')
-var fs = require('fs');
-var path = require('path');
-var h = require('hyperscript');
+var fs = require('fs')
+var path = require('path')
+var h = require('hyperscript')
 var colors = require('nice-color-palettes')
 var lo = require('lodash')
 
@@ -24,6 +24,9 @@ function serve(req, res) {
   chartScript.innerHTML = fs.readFileSync('node_modules/chart.js/dist/Chart.js')
 
   let colorScript =  h('script', "var colors = " + JSON.stringify(colors))
+
+  let styles = h('style')
+  styles.innerHTML = fs.readFileSync('styles.css')
 
   let benchmarks = []
 
@@ -72,23 +75,30 @@ function serve(req, res) {
 
   parseDir(sharedir)
 
-  let benchSelectOptions = []
-
-  lo.uniqBy(benchmarks, (el) => [el.bench, el.pathname]).forEach((el) => {
-    benchSelectOptions.push(h('option', { value: el.bench }, el.pathname + ' ' + el.bench))
+  let benchOptions = []
+  lo.uniqBy(benchmarks, (el) => [el.bench, el.pathname].join()).forEach((el) => {
+      benchOptions.push(h('li', [ h('input', { type: 'checkbox', value: el.bench }),
+                                  h('label', { class: 'checkboxLabel' }, el.pathname.replace("bench-","").replace(".json","") + ' ' + el.bench) ]))
   })
 
-  let userSelectOptions = []
-
+  let userOptions = []
   lo.uniqBy(benchmarks, 'user').forEach((el) => {
-    userSelectOptions.push(h('option', { value: el.user }, el.user))
+      userOptions.push(h('li', [ h('input', { type: 'checkbox', value: el.user }),
+                                 h('label', { class: 'checkboxLabel' }, el.user) ]))
   })
 
-  let folderSelectOptions = []
+  let folderOptions = []
+    lo.orderBy(lo.uniqBy(benchmarks, 'folder'), 'folder').forEach((el) => {
+        folderOptions.push(h('li', { id : el.folder }, [ h('input', { type: 'checkbox', value: el.folder }),
+                                   h('label', { class: 'checkboxLabel' }, el.folder.replace("_"," ")) ]))
+    })
 
-  lo.uniqBy(benchmarks, 'folder').forEach((el) => {
-    folderSelectOptions.push(h('option', { value: el.folder }, el.folder))
-  })
+    let infoItems = [ ["platform", "freemem"], ["release", "totalmem"], ["cpus", "load"] , ["nodeversion", ""]]
+    let systemInfos = []
+    infoItems.forEach((el) => {
+        systemInfos.push( h( 'tr', [ h( 'td', { class: 'tableLabel' }, el[0]), h( 'td', { id: el[0], class: 'tableContent' } ),
+                                   h( 'td', { class: 'tableLabel' }, el[1]), h( 'td', { id: el[1], class: 'tableContent' } )]))
+    })
 
   let dataScript = h('script', "var bench = " + JSON.stringify(benchmarks))
   
@@ -99,15 +109,33 @@ function serve(req, res) {
         h('html',
           [h('head',
              [h('title', 'Benchmark ci visualizer'),
-              chartScript, colorScript, dataScript]),
+              styles,chartScript, colorScript, dataScript]),
            h('body',
-             [h('h1', "Bench ssb"),
-              h('select', { id: 'benchSelect', multiple: '' }, benchSelectOptions),
-              h('select', { id: 'userSelect', multiple: '' }, userSelectOptions),
-              h('select', { id: 'folderSelect', multiple: '' }, folderSelectOptions),
-              h('div', { id: 'systemInfo' }),
-              h('canvas', { id: "myChart", width: "400", height: "400" }),
-              runScript]
+             [ h('div', { id: 'header' }, [
+                 h('img', { id: "logo", src: 'http://www.scuttlebutt.nz/assets/hermies.png' }),
+                 h('h1', "Benchmark SSB")
+               ]),
+               h('div', { id: 'checkboxes' }, [
+               h('div', { id: 'benchCheckboxes'}, [
+                 h('h4', 'Benchmarks'),
+                 h('ul', { id: 'benchSelect' }, benchOptions),
+               ]),
+               h('div', { id: 'userCheckboxes'}, [
+                 h('h4', 'Users'),
+                 h('ul', { id: 'userSelect' }, userOptions),
+               ]),
+               h('div', { id: 'folderCheckboxes'}, [
+                 h('h4', 'Timestamps'),
+                 h('ul', { id: 'folderSelect' }, folderOptions),
+               ])
+               ]),
+               h('div', { id: 'wrapper' }, h('canvas', { id: "myChart" })),
+
+               h('div', { id: 'systemInfo' }, [
+                 h('h4', 'System information'),
+                 h('table', { id: 'systemInfos' }, systemInfos),
+               ]),
+               runScript]
             )]).outerHTML
 
   return respond(res, 200, html)
