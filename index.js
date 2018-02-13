@@ -12,13 +12,36 @@ http.createServer(serve).listen(port, host, function () {
   console.log('[viewer] Listening on http://' + host + ':' + port)
 })
 
+function ifModified(req, lastMod) {
+  var ifModSince = req.headers['if-modified-since']
+  if (!ifModSince) return false
+  var d = new Date(ifModSince)
+  return d && Math.floor(d/1000) >= Math.floor(lastMod/1000)
+}
+
+function serveFile(req, res, file) {
+  fs.stat(file, function (err, stat) {
+    if (err && err.code === 'ENOENT') return respond(res, 404, 'Not found')
+    if (err) return respond(res, 500, err.stack || err)
+    if (!stat.isFile()) return respond(res, 403, 'May only load files')
+    if (ifModified(req, stat.mtime)) return respond(res, 304, 'Not modified')
+    res.writeHead(200, {
+      'Content-Length': stat.size,
+      'Last-Modified': stat.mtime.toGMTString()
+    })
+    fs.createReadStream(file).pipe(res)
+  })
+}
+
 function serve(req, res) {
+  console.log("serving request: ", req.url)
+
   if (req.method !== 'GET' && req.method !== 'HEAD')
     return respond(res, 405, 'Method must be GET or HEAD')
+  else if (req.url == "/hermies.png")
+    return serveFile(req, res, "hermies.png")
   else if (req.url != "/")
     return respond(res, 200, '')
-  
-  console.log("serving request: ", req.url)
   
   let chartScript = h('script')
   chartScript.innerHTML = fs.readFileSync('node_modules/chart.js/dist/Chart.js')
@@ -112,7 +135,7 @@ function serve(req, res) {
               styles,chartScript, colorScript, dataScript]),
            h('body',
              [ h('div', { id: 'header' }, [
-                 h('img', { id: "logo", src: 'http://www.scuttlebutt.nz/assets/hermies.png' }),
+                 h('img', { id: "logo", src: 'hermies.png' }),
                  h('h1', "Benchmark SSB")
                ]),
                h('div', { id: 'checkboxes' }, [
