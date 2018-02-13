@@ -5,11 +5,16 @@ var h = require('hyperscript')
 var colors = require('nice-color-palettes')
 var lo = require('lodash')
 
-let port = 8811
-let host = "localhost"
+var program = require('commander');
 
-http.createServer(serve).listen(port, host, function () {
-  console.log('[viewer] Listening on http://' + host + ':' + port)
+program
+  .option('-h, --host [value]', 'Host to listen to', 'localhost')
+  .option('-p, --port [value]', 'Port to listen on', 8811)
+  .option('-r, --results [value]', 'Path to where results are stored', '../bench-ssb-share/')
+  .parse(process.argv);
+
+http.createServer(serve).listen(program.port, program.host, function () {
+  console.log('[viewer] Listening on http://' + program.host + ':' + program.port)
 })
 
 function ifModified(req, lastMod) {
@@ -94,9 +99,7 @@ function serve(req, res) {
     })
   }
   
-  let sharedir = '../bench-ssb-share/'
-
-  parseDir(sharedir)
+  parseDir(program.results)
 
   let benchOptions = []
   lo.uniqBy(benchmarks, (el) => [el.bench, el.pathname].join()).forEach((el) => {
