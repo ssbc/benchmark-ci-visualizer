@@ -16,3 +16,6 @@ name of the benchmark and the value an array of [x, y] values.
 See the
 [bench-ssb-share](%r/fZCmbP0wbCqwPvONg1np7WD1UvvQh5yt3P0CoIDPw=.sha256)
 repo for examples.
+
+This requires [sbot-about](https://github.com/ssbc/ssb-about) to be
+installed as a plugin in scuttlebot.

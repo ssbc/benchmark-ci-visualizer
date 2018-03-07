@@ -7,7 +7,7 @@
     for (let i = 0; i < benchmarks.length; ++i) {
       let b = benchmarks[i]
       ds.push({
-        label: b.bench + " - " + b.folder + " - " + b.user,
+        label: b.bench + " - " + b.folder + " - " + b.userName,
         data: b.data.map((v) => { return { x: v[0], y: v[1] } }),
         fill: false,
         backgroundColor: colors[i][0],
@@ -121,7 +121,7 @@
 
     let selectedUserItems = Array.from(document.querySelectorAll('#userSelect input:checked')).map(opt => opt.value)
     if (selectedUserItems.length > 0)
-      filteredBench = filteredBench.filter((b) => selectedUserItems.includes(b.user))
+      filteredBench = filteredBench.filter((b) => selectedUserItems.includes(b.userId))
 
     updateTimestampDisplay(filteredBench)
 

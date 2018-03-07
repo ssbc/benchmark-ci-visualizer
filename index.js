@@ -13,8 +13,12 @@ program
   .option('-r, --results [value]', 'Path to where results are stored', '../bench-ssb-share/')
   .parse(process.argv);
 
-http.createServer(serve).listen(program.port, program.host, function () {
-  console.log('[viewer] Listening on http://' + program.host + ':' + program.port)
+require('ssb-client')(function (err, sbot, config) {
+  sbot.about.get((err, allAbouts) => {
+    http.createServer(function(req, res) { return serve(allAbouts, req, res) }).listen(program.port, program.host, function () {
+      console.log('[viewer] Listening on http://' + program.host + ':' + program.port)
+    })
+  })
 })
 
 function ifModified(req, lastMod) {
@@ -38,7 +42,7 @@ function serveFile(req, res, file) {
   })
 }
 
-function serve(req, res) {
+function serve(abouts, req, res) {
   console.log("serving request: ", req.url)
 
   if (req.method !== 'GET' && req.method !== 'HEAD')
@@ -74,8 +78,28 @@ function serve(req, res) {
       console.log("error reading system-info.json", ex)
     }
 
+    let values = abouts[userFolder]
+
+    let userName = userFolder, userImage = ""
+
+    for (var key in values) {
+      for (var author in values[key]) {
+        if (author != userFolder)
+          break;
+
+        var v = values[key][author][0]
+
+        if (!v) break;
+
+        if (key == 'name') userName = v
+        if (key == 'image') userImage = typeof v == 'string' ? v : v.link
+      }
+    }
+
     let benchData = {
-      user: userFolder,
+      userId: userFolder,
+      userName: userName,
+      userImage: userImage,
       folder: runFolder,
       pathname,
       bench: benchName,
@@ -109,8 +133,10 @@ function serve(req, res) {
 
   let userOptions = []
   lo.uniqBy(benchmarks, 'user').forEach((el) => {
-      userOptions.push(h('li', [ h('input', { type: 'checkbox', value: el.user }),
-                                 h('label', { class: 'checkboxLabel' }, el.user) ]))
+    userOptions.push(h('li', [ h('input', { type: 'checkbox', value: el.userId }),
+                               h('img', { src: 'http://localhost:8989/blobs/get/' + el.userImage, class: 'avatar' }),
+                               h('label', { class: 'checkboxLabel' }, el.userName)
+                             ]))
   })
 
   let folderOptions = []

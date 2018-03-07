@@ -17,9 +17,10 @@
   "license": "Beerware",
   "dependencies": {
     "chart.js": "^2.7.1",
+    "commander": "^2.14.1",
     "hyperscript": "2.0.2",
     "lodash": "^4.17.4",
     "nice-color-palettes": "^2.0.0",
-    "commander": "^2.14.1"
+    "ssb-client": "^4.5.7"
   }
 }
