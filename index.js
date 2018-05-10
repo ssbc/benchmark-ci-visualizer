@@ -14,6 +14,11 @@ program
   .parse(process.argv);
 
 require('ssb-client')(function (err, sbot, config) {
+  if (err) {
+    console.log(err)
+    return
+  }
+
   sbot.about.get((err, allAbouts) => {
     http.createServer(function(req, res) { return serve(allAbouts, req, res) }).listen(program.port, program.host, function () {
       console.log('[viewer] Listening on http://' + program.host + ':' + program.port)
@@ -75,7 +80,7 @@ function serve(abouts, req, res) {
     try {
       systemInfo = JSON.parse(fs.readFileSync(filename.replace(pathname, "system-info.json"), "utf8"))
     } catch (ex) {
-      console.log("error reading system-info.json", ex)
+      console.log("error reading system-info.json for ", filename)
     }
 
     let values = abouts[userFolder]
