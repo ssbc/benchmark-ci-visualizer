@@ -4,14 +4,15 @@
   let createDatasetFromBenchmarks = (benchmarks) => {
     let ds = []
 
-    for (let i = 0; i < benchmarks.length; ++i) {
+    for (let i = 0; i < benchmarks.length && i < 20; ++i) {
       let b = benchmarks[i]
+
       ds.push({
         label: b.bench + " - " + b.folder + " - " + b.userName,
         data: b.data.map((v) => { return { x: v[0], y: v[1] } }),
         fill: false,
-        backgroundColor: colors[i][0],
-        borderColor: colors[i][0]
+        backgroundColor: colors[i%100][0],
+        borderColor: colors[i%100][0]
       })
     }
 

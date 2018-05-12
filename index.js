@@ -145,17 +145,18 @@ function serve(abouts, req, res) {
   })
 
   let folderOptions = []
-    lo.orderBy(lo.uniqBy(benchmarks, 'folder'), 'folder').forEach((el) => {
-        folderOptions.push(h('li', { id : el.folder }, [ h('input', { type: 'checkbox', value: el.folder }),
-                                   h('label', { class: 'checkboxLabel' }, el.folder.replace("_"," ")) ]))
-    })
+  lo.orderBy(lo.uniqBy(benchmarks, 'folder'), 'folder').forEach((el) => {
+    if (el.folder)
+      folderOptions.push(h('li', { id : el.folder }, [ h('input', { type: 'checkbox', value: el.folder }),
+                                                       h('label', { class: 'checkboxLabel' }, el.folder.replace("_"," ")) ]))
+  })
 
-    let infoItems = [ ["platform", "freemem"], ["release", "totalmem"], ["cpus", "load"] , ["nodeversion", ""]]
-    let systemInfos = []
-    infoItems.forEach((el) => {
-        systemInfos.push( h( 'tr', [ h( 'td', { class: 'tableLabel' }, el[0]), h( 'td', { id: el[0], class: 'tableContent' } ),
-                                   h( 'td', { class: 'tableLabel' }, el[1]), h( 'td', { id: el[1], class: 'tableContent' } )]))
-    })
+  let infoItems = [ ["platform", "freemem"], ["release", "totalmem"], ["cpus", "load"] , ["nodeversion", ""]]
+  let systemInfos = []
+  infoItems.forEach((el) => {
+    systemInfos.push( h( 'tr', [ h( 'td', { class: 'tableLabel' }, el[0]), h( 'td', { id: el[0], class: 'tableContent' } ),
+                                 h( 'td', { class: 'tableLabel' }, el[1]), h( 'td', { id: el[1], class: 'tableContent' } )]))
+  })
 
   let dataScript = h('script', "var bench = " + JSON.stringify(benchmarks))
   
