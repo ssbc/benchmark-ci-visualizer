@@ -137,7 +137,7 @@ function serve(abouts, req, res) {
   })
 
   let userOptions = []
-  lo.uniqBy(benchmarks, 'user').forEach((el) => {
+  lo.uniqBy(benchmarks, 'userId').forEach((el) => {
     userOptions.push(h('li', [ h('input', { type: 'checkbox', value: el.userId }),
                                h('img', { src: 'http://localhost:8989/blobs/get/' + el.userImage, class: 'avatar' }),
                                h('label', { class: 'checkboxLabel' }, el.userName)
