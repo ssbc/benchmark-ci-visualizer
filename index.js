@@ -83,6 +83,7 @@ function serve(abouts, req, res) {
       console.log("error reading system-info.json for ", filename)
     }
 
+    userFolder = userFolder.replace(/_/g, '/')
     let values = abouts[userFolder]
 
     let userName = userFolder, userImage = ""
